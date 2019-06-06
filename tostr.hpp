@@ -16,6 +16,9 @@
 #include <boost/algorithm/string.hpp>
 #include "stdint.h"
 #include <iostream>
+#include <unordered_map>
+#include <string>
+#include <sstream>
 
 #define S(s) #s
 #define __DECL_CONTAINER_FMT(_container, _fmt) \
@@ -316,7 +319,7 @@ struct __ToString<T, false, false>
 {
 	static std::string to(T const& c)
 	{
-		std::stringstream ss;
+		std::ostringstream ss;
 		ss << c;
 		return ss.str();
 	}
