@@ -11,14 +11,15 @@
 #include <queue>
 #include <algorithm>
 #include <iterator>
-//#include "String/string_converter.hpp"
+#include <chrono>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 #include "stdint.h"
 #include <iostream>
-#include <unordered_map>
-#include <string>
 #include <sstream>
+#include <iomanip>
+#include <unordered_map>
+#include <unordered_set>
 
 #define S(s) #s
 #define __DECL_CONTAINER_FMT(_container, _fmt) \
@@ -222,6 +223,7 @@ namespace KLib
 	__DECL_IS_CONTAINER(std::deque);
 	__DECL_IS_CONTAINER(std::priority_queue);
 	__DECL_IS_CONTAINER(std::unordered_map);
+	__DECL_IS_CONTAINER(std::unordered_set);
 
 /*--------------------------------  end is_container  ---------------------------------------*/
 
@@ -235,6 +237,7 @@ namespace KLib
 	__DECL_MAP_CONTAINER_FMT(std::unordered_map, "{%s}");
 	__DECL_MAP_CONTAINER_FMT(std::multimap, "{%s}");
 	__DECL_SET_CONTAINER_FMT(std::set, "(%s)");
+	__DECL_SET_CONTAINER_FMT(std::unordered_set, "(%s)");
 	__DECL_SET_CONTAINER_FMT(std::multiset, "(%s)");
 	__DECL_CONTAINER_FMT(std::stack, "[%s]");
 	__DECL_CONTAINER_FMT(std::deque, "[%s]");
@@ -319,9 +322,24 @@ struct __ToString<T, false, false>
 {
 	static std::string to(T const& c)
 	{
-		std::ostringstream ss;
+		std::stringstream ss;
 		ss << c;
 		return ss.str();
+	}
+};
+
+template<>
+struct __ToString<std::chrono::system_clock::time_point, false, false>
+{
+	static std::string to(std::chrono::system_clock::time_point const& tp, std::string const& format="%Y-%m-%d %H:%M:%S")
+	{
+		auto stamp = std::chrono::system_clock::to_time_t(tp);
+		std::tm buf;
+		localtime_r(&stamp, &buf);
+
+		std::ostringstream os;
+		os << std::put_time(&buf, format.c_str());
+		return os.str();
 	}
 };
 
@@ -457,6 +475,5 @@ std::string tostr(T const& c)
 {
 	return __ToString<T, is_container<T>::value, has_to_string<T>::value || has_toString<T>::value>::to(c);
 }
-
 }
 #endif
